@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suika Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Suika Game</h1>
+    <canvas id="gameCanvas"></canvas>
+    <div id="scoreBoard">Score: <span id="score">0</span></div>
+    <button id="restartButton">Restart</button>
+    <script src="script.js"></script>
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = 400;
+        canvas.height = 600;
+        let score = 0;
+        let fruits = [];
+        let gravity = 0.5;
+        let isGameOver = false;
+
+        class Fruit {
+            constructor(x, y, radius, color) {
+                this.x = x;
+                this.y = y;
+                this.radius = radius;
+                this.color = color;
+                this.dy = 0;
+            }
+
+            update() {
+                if (this.y + this.radius < canvas.height) {
+                    this.dy += gravity;
+                    this.y += this.dy;
+                } else {
+                    isGameOver = true;
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.closePath();
+            }
+        }
+
+        function spawnFruit() {
+            const colors = ["red", "blue", "green", "orange", "purple"];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            const radius = 20 + Math.random() * 20;
+            const x = Math.random() * (canvas.width - radius * 2) + radius;
+            fruits.push(new Fruit(x, 0, radius, color));
+        }
+
+        function updateGame() {
+            if (!isGameOver) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                fruits.forEach(fruit => {
+                    fruit.update();
+                    fruit.draw();
+                });
+                requestAnimationFrame(updateGame);
+            } else {
+                alert("Game Over! Your score: " + score);
+            }
+        }
+
+        document.getElementById("restartButton").addEventListener("click", function () {
+            fruits = [];
+            score = 0;
+            isGameOver = false;
+            document.getElementById("score").textContent = score;
+            updateGame();
+        });
+
+        setInterval(() => {
+            if (!isGameOver) {
+                spawnFruit();
+                score += 10;
+                document.getElementById("score").textContent = score;
+            }
+        }, 1000);
+
+        updateGame();
+    </script>
+</body>
+</html>
